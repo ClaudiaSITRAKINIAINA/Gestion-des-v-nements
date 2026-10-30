@@ -1,0 +1,153 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Eventia | Gestion des événements{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #101c36;
+            --blue: #315efb;
+            --background: #f4f6fb;
+        }
+
+        body {
+            background: var(--background);
+            color: #25304a;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background: var(--navy);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: .5px;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, #101c36, #315efb);
+            color: white;
+            border-radius: 22px;
+            padding: 48px 35px;
+        }
+
+        .card {
+            border: 0;
+            border-radius: 17px;
+            box-shadow: 0 5px 24px rgba(25, 40, 75, .06);
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            border-color: var(--blue);
+        }
+
+        .form-control, .form-select {
+            padding: 11px;
+            border-radius: 10px;
+        }
+
+        .footer {
+            color: #8390a9;
+            border-top: 1px solid #e3e8f1;
+            margin-top: 60px;
+            padding: 25px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'event_list' %}">
+            EVENTIA.
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navigation">
+            <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+                <a class="nav-link" href="{% url 'event_list' %}">
+                    Événements
+                </a>
+
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'my_registrations' %}">
+                        Mes inscriptions
+                    </a>
+
+                    {% if user.is_staff or user.groups.all %}
+                        {% if user.is_staff %}
+                            <a class="nav-link" href="{% url 'manager_dashboard' %}">
+                                Gestion
+                            </a>
+                        {% else %}
+                            {% for group in user.groups.all %}
+                                {% if group.name == 'Gestionnaire' %}
+                                    <a class="nav-link" href="{% url 'manager_dashboard' %}">
+                                        Gestion
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endif %}
+
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-light btn-sm">
+                            Déconnexion
+                        </button>
+                    </form>
+                {% else %}
+                    <a class="nav-link" href="{% url 'login' %}">
+                        Connexion
+                    </a>
+                    <a class="btn btn-primary btn-sm px-3"
+                       href="{% url 'register' %}">
+                        Créer un compte
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-4">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+</main>
+
+<footer class="footer">
+    <div class="container text-center">
+        <strong>EVENTIA.</strong> — Plateforme de gestion des événements.
+        <div class="small mt-2">© 2026 — Tous droits réservés.</div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

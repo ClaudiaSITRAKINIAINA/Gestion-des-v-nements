@@ -1,0 +1,108 @@
+
+{% extends 'events/base.html' %}
+
+{% block title %}Gestion | Eventia{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold">Tableau de bord</h2>
+        <p class="text-secondary mb-0">
+            Administration des événements et inscriptions.
+        </p>
+    </div>
+
+    <a href="{% url 'event_create' %}" class="btn btn-primary">
+        + Nouvel événement
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card p-3">
+            <div class="text-secondary small">Événements</div>
+            <h2 class="fw-bold">{{ total_evenements }}</h2>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card p-3">
+            <div class="text-secondary small">Inscriptions</div>
+            <h2 class="fw-bold">{{ total_inscriptions }}</h2>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card p-3">
+            <div class="text-secondary small">Confirmées</div>
+            <h2 class="fw-bold text-success">{{ total_confirmees }}</h2>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="card p-3">
+            <div class="text-secondary small">Annulées</div>
+            <h2 class="fw-bold text-secondary">{{ total_annulees }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="card p-3 p-md-4">
+    <h5 class="fw-bold mb-3">Gestion des événements</h5>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Événement</th>
+                    <th>Date</th>
+                    <th>Catégorie</th>
+                    <th>Places restantes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for evenement in evenements %}
+                    <tr>
+                        <td class="fw-semibold">{{ evenement.titre }}</td>
+                        <td>{{ evenement.date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ evenement.get_categorie_display }}</td>
+                        <td>{{ evenement.places_restantes }}</td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <a href="{% url 'event_attendees' evenement.pk %}"
+                                   class="btn btn-outline-success btn-sm">
+                                    Participants
+                                </a>
+
+                                <a href="{% url 'event_update' evenement.pk %}"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Modifier
+                                </a>
+
+                                <form method="post"
+                                      action="{% url 'event_delete' evenement.pk %}"
+                                      onsubmit="return confirm('Supprimer cet événement et ses inscriptions ?')">
+                                    {% csrf_token %}
+                                    <button class="btn btn-outline-danger btn-sm">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-secondary">
+                            Aucun événement enregistré.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+# Environnement virtuel
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Base de données locale
+db.sqlite3
+*.sqlite3
+
+# Fichiers sensibles
+.env
+.env.*
+!.env.example
+
+# Fichiers système et éditeur
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Couverture des tests
+.coverage
+htmlcov/

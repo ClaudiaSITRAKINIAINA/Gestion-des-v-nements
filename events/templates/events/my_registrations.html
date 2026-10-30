@@ -1,0 +1,69 @@
+
+{% extends 'events/base.html' %}
+
+{% block title %}Mes inscriptions | Eventia{% endblock %}
+
+{% block content %}
+
+<h2 class="fw-bold mb-2">Mon espace personnel</h2>
+<p class="text-secondary mb-4">
+    Retrouvez ici toutes vos inscriptions.
+</p>
+
+<div class="card p-3 p-md-4">
+    {% for inscription in inscriptions %}
+        <div class="row align-items-center py-3 border-bottom">
+            <div class="col-md-7">
+                <h5 class="fw-bold mb-1">
+                    {{ inscription.evenement.titre }}
+                </h5>
+
+                <div class="text-secondary small">
+                    {{ inscription.evenement.date|date:"d/m/Y à H:i" }}
+                    · {{ inscription.evenement.lieu }}
+                </div>
+
+                <div class="mt-2">
+                    {% if inscription.statut == 'confirmee' %}
+                        <span class="badge text-bg-success">
+                            Confirmée
+                        </span>
+                    {% else %}
+                        <span class="badge text-bg-secondary">
+                            Annulée
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                <a href="{% url 'event_detail' inscription.evenement.pk %}"
+                   class="btn btn-outline-primary btn-sm">
+                    Voir l'événement
+                </a>
+
+                {% if inscription.statut == 'confirmee' and inscription.evenement.date > now %}
+                    <form method="post"
+                          action="{% url 'cancel_registration' inscription.pk %}"
+                          class="d-inline">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-danger btn-sm"
+                                onclick="return confirm('Confirmer l’annulation ?')">
+                            Annuler
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    {% empty %}
+        <div class="text-center p-5">
+            <h5>Aucune inscription pour le moment.</h5>
+            <a href="{% url 'event_list' %}"
+               class="btn btn-primary mt-3">
+                Découvrir les événements
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,84 @@
+
+{% extends 'events/base.html' %}
+
+{% block title %}{{ evenement.titre }} | Eventia{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'event_list' %}" class="text-decoration-none">
+    ← Retour aux événements
+</a>
+
+<div class="card p-4 p-md-5 mt-3">
+    <span class="badge text-bg-primary align-self-start">
+        {{ evenement.get_categorie_display }}
+    </span>
+
+    <h1 class="fw-bold mt-3">{{ evenement.titre }}</h1>
+
+    <p class="text-secondary">
+        {{ evenement.description|linebreaks }}
+    </p>
+
+    <hr>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <strong>Date et heure</strong>
+            <p>{{ evenement.date|date:"d/m/Y à H:i" }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <strong>Lieu</strong>
+            <p>{{ evenement.lieu }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <strong>Capacité totale</strong>
+            <p>{{ evenement.capacite }} personnes</p>
+        </div>
+
+        <div class="col-md-6">
+            <strong>Places restantes</strong>
+            <p>{{ evenement.places_restantes }}</p>
+        </div>
+    </div>
+
+    <hr>
+
+    {% if user.is_authenticated %}
+
+        {% if inscription and inscription.statut == 'confirmee' %}
+            <div class="alert alert-success">
+                Vous êtes déjà inscrit à cet événement.
+            </div>
+
+        {% elif evenement.date <= now %}
+            <div class="alert alert-secondary">
+                Les inscriptions sont terminées.
+            </div>
+
+        {% elif evenement.est_complet %}
+            <div class="alert alert-warning">
+                Cet événement est complet.
+            </div>
+
+        {% else %}
+            <form method="post"
+                  action="{% url 'event_register' evenement.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-primary btn-lg">
+                    Confirmer mon inscription
+                </button>
+            </form>
+        {% endif %}
+
+    {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}"
+           class="btn btn-primary">
+            Connectez-vous pour vous inscrire
+        </a>
+    {% endif %}
+</div>
+
+{% endblock %}

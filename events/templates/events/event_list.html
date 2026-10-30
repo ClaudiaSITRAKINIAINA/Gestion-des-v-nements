@@ -1,0 +1,140 @@
+
+{% extends 'events/base.html' %}
+
+{% block title %}Événements | Eventia{% endblock %}
+
+{% block content %}
+
+<section class="hero mb-5">
+    <span class="badge bg-light text-primary mb-3">
+        DÉCOUVREZ · PARTICIPEZ · PARTAGEZ
+    </span>
+
+    <h1 class="display-5 fw-bold">Trouvez votre prochain événement.</h1>
+
+    <p class="lead opacity-75">
+        Découvrez les événements et réservez votre place en quelques clics.
+    </p>
+</section>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold">Événements à venir</h2>
+        <p class="text-secondary">Explorez les événements disponibles.</p>
+    </div>
+</div>
+
+<form method="get" class="card p-3 mb-4">
+    <div class="row g-2">
+        <div class="col-md-7">
+            <input type="text" name="q" class="form-control"
+                   placeholder="Rechercher un événement..."
+                   value="{{ recherche }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="categorie" class="form-select">
+                <option value="">Toutes les catégories</option>
+                {% for code, nom in categories %}
+                    <option value="{{ code }}"
+                        {% if categorie == code %}selected{% endif %}>
+                        {{ nom }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-primary">Rechercher</button>
+        </div>
+    </div>
+</form>
+
+<div class="row g-4">
+
+    {% for evenement in page_obj %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100">
+                <div class="card-body p-4">
+
+                    <span class="badge text-bg-primary mb-3">
+                        {{ evenement.get_categorie_display }}
+                    </span>
+
+                    <h4 class="fw-bold">{{ evenement.titre }}</h4>
+
+                    <p class="text-secondary">
+                        {{ evenement.description|truncatewords:20 }}
+                    </p>
+
+                    <hr>
+
+                    <p class="mb-2">
+                        <strong>📅 Date :</strong>
+                        {{ evenement.date|date:"d/m/Y à H:i" }}
+                    </p>
+
+                    <p class="mb-2">
+                        <strong>📍 Lieu :</strong>
+                        {{ evenement.lieu }}
+                    </p>
+
+                    <p class="mb-3">
+                        <strong>Places restantes :</strong>
+                        {{ evenement.places_restantes }}
+                    </p>
+
+                    <a href="{% url 'event_detail' evenement.pk %}"
+                       class="btn btn-primary w-100">
+                        Voir les détails
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    {% empty %}
+        <div class="col-12">
+            <div class="card p-5 text-center">
+                <h4>Aucun événement trouvé</h4>
+                <p class="text-secondary">
+                    Essayez de modifier votre recherche.
+                </p>
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-5">
+    <ul class="pagination justify-content-center">
+
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?q={{ recherche|urlencode }}&categorie={{ categorie|urlencode }}&page={{ page_obj.previous_page_number }}">
+                    Précédent
+                </a>
+            </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?q={{ recherche|urlencode }}&categorie={{ categorie|urlencode }}&page={{ page_obj.next_page_number }}">
+                    Suivant
+                </a>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}
