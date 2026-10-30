@@ -73,6 +73,7 @@ class EvenementForm(forms.ModelForm):
             'lieu',
             'capacite',
             'categorie',
+            'image',
         ]
 
         widgets = {
@@ -97,6 +98,12 @@ class EvenementForm(forms.ModelForm):
             'categorie': forms.Select(
                 attrs={'class': 'form-select'}
             ),
+            'image': forms.ClearableFileInput(
+                attrs={
+                    'class': 'form-control',
+                    'accept': 'image/*'
+                }
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -107,6 +114,9 @@ class EvenementForm(forms.ModelForm):
                 field.widget.attrs.update({
                     'class': 'form-control'
                 })
+
+        self.fields['image'].required = False
+        self.fields['image'].label = "Image de l'événement"
 
     def clean_date(self):
         date = self.cleaned_data['date']

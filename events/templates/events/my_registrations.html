@@ -1,69 +1,300 @@
 
 {% extends 'events/base.html' %}
 
-{% block title %}Mes inscriptions | Eventia{% endblock %}
+{% block title %}Mon espace personnel | EVENTIA{% endblock %}
 
 {% block content %}
+<style>
+    .personal-page {
+        max-width: 1150px;
+        margin: 25px auto 55px;
+    }
 
-<h2 class="fw-bold mb-2">Mon espace personnel</h2>
-<p class="text-secondary mb-4">
-    Retrouvez ici toutes vos inscriptions.
-</p>
+    .personal-hero {
+        background: linear-gradient(120deg, #101d3b, #174b91);
+        border-radius: 22px;
+        color: white;
+        padding: 32px;
+        margin-bottom: 27px;
+    }
 
-<div class="card p-3 p-md-4">
-    {% for inscription in inscriptions %}
-        <div class="row align-items-center py-3 border-bottom">
-            <div class="col-md-7">
-                <h5 class="fw-bold mb-1">
-                    {{ inscription.evenement.titre }}
-                </h5>
+    .personal-hero h1 {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 750;
+    }
 
-                <div class="text-secondary small">
-                    {{ inscription.evenement.date|date:"d/m/Y à H:i" }}
-                    · {{ inscription.evenement.lieu }}
+    .stat-card {
+        height: 100%;
+        background: white;
+        border: 1px solid #e8edf5;
+        border-radius: 17px;
+        padding: 22px;
+        box-shadow: 0 8px 25px rgba(20, 42, 80, .045);
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        display: grid;
+        place-items: center;
+        border-radius: 13px;
+        font-size: 1.25rem;
+        margin-bottom: 15px;
+    }
+
+    .stat-number {
+        color: #15294b;
+        font-size: 1.9rem;
+        font-weight: 800;
+    }
+
+    .stat-label {
+        color: #718096;
+        font-size: .87rem;
+        font-weight: 600;
+    }
+
+    .section-heading {
+        color: #15294b;
+        font-weight: 750;
+        margin: 32px 0 17px;
+    }
+
+    .registration-card {
+        background: white;
+        border: 1px solid #e8edf5;
+        border-radius: 17px;
+        padding: 21px;
+        height: 100%;
+        box-shadow: 0 7px 22px rgba(20, 42, 80, .045);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .registration-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(20, 42, 80, .09);
+    }
+
+    .event-category {
+        display: inline-block;
+        background: #edf4ff;
+        color: #2058a0;
+        border-radius: 30px;
+        padding: 6px 11px;
+        font-size: .75rem;
+        font-weight: 700;
+    }
+
+    .registration-title {
+        color: #15294b;
+        font-weight: 750;
+        font-size: 1.08rem;
+        margin: 13px 0;
+    }
+
+    .registration-info {
+        color: #718096;
+        font-size: .88rem;
+        margin-bottom: 9px;
+    }
+
+    .status-pill {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: .76rem;
+        font-weight: 750;
+    }
+
+    .status-confirmed {
+        background: #e8f7ef;
+        color: #16834b;
+    }
+
+    .status-cancelled {
+        background: #fff0f0;
+        color: #c03939;
+    }
+
+    .registration-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 18px;
+        padding-top: 15px;
+        border-top: 1px solid #edf0f5;
+    }
+
+    .btn-small-eventia {
+        border-radius: 9px;
+        padding: 9px 13px;
+        font-size: .83rem;
+        font-weight: 650;
+    }
+
+    .empty-state {
+        background: white;
+        border: 1px dashed #cbd5e1;
+        border-radius: 18px;
+        padding: 45px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        width: 65px;
+        height: 65px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 17px;
+        border-radius: 20px;
+        background: #edf4ff;
+        color: #2058a0;
+        font-size: 1.8rem;
+    }
+
+    @media (max-width: 576px) {
+        .personal-hero { padding: 24px 19px; }
+        .registration-actions { flex-direction: column; }
+        .registration-actions a,
+        .registration-actions button { width: 100%; }
+    }
+</style>
+
+<div class="personal-page">
+
+    <section class="personal-hero">
+        <div class="small text-white-50 mb-2">ESPACE PARTICIPANT</div>
+        <h1><i class="bi bi-person-circle me-2"></i>Bonjour, {{ user.username }} !</h1>
+        <p class="text-white-50 mb-0">
+            Retrouvez ici vos inscriptions et suivez leur état en un seul endroit.
+        </p>
+    </section>
+
+    <!-- STATISTIQUES -->
+    <div class="row g-3">
+
+        <div class="col-12 col-sm-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#edf4ff;color:#2058a0">
+                    <i class="bi bi-calendar-check"></i>
                 </div>
-
-                <div class="mt-2">
-                    {% if inscription.statut == 'confirmee' %}
-                        <span class="badge text-bg-success">
-                            Confirmée
-                        </span>
-                    {% else %}
-                        <span class="badge text-bg-secondary">
-                            Annulée
-                        </span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                <a href="{% url 'event_detail' inscription.evenement.pk %}"
-                   class="btn btn-outline-primary btn-sm">
-                    Voir l'événement
-                </a>
-
-                {% if inscription.statut == 'confirmee' and inscription.evenement.date > now %}
-                    <form method="post"
-                          action="{% url 'cancel_registration' inscription.pk %}"
-                          class="d-inline">
-                        {% csrf_token %}
-                        <button class="btn btn-outline-danger btn-sm"
-                                onclick="return confirm('Confirmer l’annulation ?')">
-                            Annuler
-                        </button>
-                    </form>
-                {% endif %}
+                <div class="stat-number">{{ total_inscriptions }}</div>
+                <div class="stat-label">INSCRIPTIONS AU TOTAL</div>
             </div>
         </div>
-    {% empty %}
-        <div class="text-center p-5">
-            <h5>Aucune inscription pour le moment.</h5>
-            <a href="{% url 'event_list' %}"
-               class="btn btn-primary mt-3">
-                Découvrir les événements
+
+        <div class="col-12 col-sm-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#e8f7ef;color:#16834b">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-number">{{ total_confirmees }}</div>
+                <div class="stat-label">INSCRIPTIONS CONFIRMÉES</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-4">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fff0f0;color:#c03939">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+                <div class="stat-number">{{ total_annulees }}</div>
+                <div class="stat-label">INSCRIPTIONS ANNULÉES</div>
+            </div>
+        </div>
+
+    </div>
+
+    <h2 class="section-heading">
+        <i class="bi bi-ticket-perforated me-2"></i>
+        Mes inscriptions
+    </h2>
+
+    {% if inscriptions %}
+        <div class="row g-3">
+
+            {% for inscription in inscriptions %}
+                <div class="col-12 col-md-6 col-lg-4">
+                    <article class="registration-card">
+
+                        <span class="event-category">
+                            {{ inscription.evenement.get_categorie_display }}
+                        </span>
+
+                        <h3 class="registration-title">
+                            {{ inscription.evenement.titre }}
+                        </h3>
+
+                        <div class="registration-info">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            {{ inscription.evenement.date|date:"d/m/Y à H:i" }}
+                        </div>
+
+                        <div class="registration-info">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            {{ inscription.evenement.lieu }}
+                        </div>
+
+                        <div class="registration-info">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Inscrit le {{ inscription.date_inscription|date:"d/m/Y" }}
+                        </div>
+
+                        <div class="mt-3">
+                            {% if inscription.statut == 'confirmee' %}
+                                <span class="status-pill status-confirmed">
+                                    <i class="bi bi-check-circle me-1"></i> Confirmée
+                                </span>
+                            {% else %}
+                                <span class="status-pill status-cancelled">
+                                    <i class="bi bi-x-circle me-1"></i> Annulée
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="registration-actions">
+
+                            <a href="{% url 'event_detail' inscription.evenement.pk %}"
+                               class="btn btn-primary btn-small-eventia">
+                                <i class="bi bi-eye me-1"></i> Voir l'événement
+                            </a>
+
+                            {% if inscription.statut == 'confirmee' and inscription.evenement.date > now %}
+                                <form method="post"
+                                      action="{% url 'cancel_registration' inscription.pk %}"
+                                      onsubmit="return confirm('Voulez-vous vraiment annuler cette inscription ?');">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="btn btn-outline-danger btn-small-eventia">
+                                        <i class="bi bi-x-circle me-1"></i> Annuler
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                        </div>
+
+                    </article>
+                </div>
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="bi bi-calendar2-plus"></i>
+            </div>
+            <h4 class="fw-bold" style="color:#15294b">Aucune inscription pour le moment</h4>
+            <p class="text-muted mb-4">
+                Découvrez les événements disponibles et participez à ceux qui vous intéressent.
+            </p>
+            <a href="{% url 'event_list' %}" class="btn btn-primary rounded-3 px-4 py-2">
+                <i class="bi bi-search me-2"></i>Découvrir les événements
             </a>
         </div>
-    {% endfor %}
-</div>
 
+    {% endif %}
+
+</div>
 {% endblock %}

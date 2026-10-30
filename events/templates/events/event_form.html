@@ -1,51 +1,223 @@
 
 {% extends 'events/base.html' %}
 
-{% block title %}{{ titre_page }} | Eventia{% endblock %}
+{% block title %}{{ titre_page|default:"Gestion d'un événement" }} | EVENTIA{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card p-4 p-md-5">
-            <h2 class="fw-bold mb-4">{{ titre_page }}</h2>
+<style>
+    .event-form-page {
+        max-width: 1050px;
+        margin: 25px auto 55px;
+    }
 
-            <form method="post">
-                {% csrf_token %}
+    .form-heading {
+        background: linear-gradient(120deg, #101d3b, #174b91);
+        color: white;
+        border-radius: 22px;
+        padding: 30px;
+        margin-bottom: 25px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-heading::after {
+        content: "";
+        position: absolute;
+        width: 210px;
+        height: 210px;
+        border: 35px solid rgba(255,255,255,.07);
+        border-radius: 50%;
+        right: -45px;
+        top: -90px;
+    }
+
+    .form-heading h1 {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        font-weight: 750;
+        margin-bottom: 8px;
+    }
+
+    .form-card {
+        background: white;
+        border: 1px solid #e8edf5;
+        border-radius: 20px;
+        padding: clamp(18px, 4vw, 35px);
+        box-shadow: 0 12px 35px rgba(20, 42, 80, .07);
+    }
+
+    .form-section-title {
+        font-size: 1.05rem;
+        font-weight: 750;
+        color: #15294b;
+        border-bottom: 1px solid #edf0f5;
+        padding-bottom: 13px;
+        margin: 8px 0 22px;
+    }
+
+    .form-label {
+        font-weight: 650;
+        color: #34445f;
+        margin-bottom: 8px;
+    }
+
+    .form-control, .form-select, textarea {
+        border: 1px solid #dce3ee !important;
+        border-radius: 11px !important;
+        padding: 12px 14px !important;
+        min-height: 47px;
+        box-shadow: none !important;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    textarea.form-control {
+        min-height: 145px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3478dc !important;
+        box-shadow: 0 0 0 3px rgba(52,120,220,.12) !important;
+    }
+
+    .field-error {
+        color: #dc3545;
+        font-size: .85rem;
+        margin-top: 6px;
+    }
+
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: flex-end;
+        border-top: 1px solid #edf0f5;
+        margin-top: 28px;
+        padding-top: 22px;
+    }
+
+    .btn-eventia {
+        background: #174b91;
+        color: white;
+        border: none;
+        border-radius: 11px;
+        padding: 12px 22px;
+        font-weight: 650;
+    }
+
+    .btn-eventia:hover {
+        background: #10396f;
+        color: white;
+    }
+
+    .btn-cancel {
+        border: 1px solid #dce3ee;
+        color: #53627a;
+        border-radius: 11px;
+        padding: 12px 22px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: #f3f6fa;
+        color: #15294b;
+    }
+
+    @media (max-width: 576px) {
+        .form-heading { padding: 23px 19px; }
+        .form-actions { flex-direction: column-reverse; }
+        .form-actions a, .form-actions button { width: 100%; text-align: center; }
+    }
+</style>
+
+<div class="event-form-page">
+
+    <div class="form-heading">
+        <div class="position-relative" style="z-index:1">
+            <div class="small text-white-50 mb-2">ESPACE GESTIONNAIRE / ÉVÉNEMENTS</div>
+            <h1>
+                {% if evenement %}
+                    <i class="bi bi-pencil-square me-2"></i>Modifier l'événement
+                {% else %}
+                    <i class="bi bi-calendar-plus me-2"></i>Créer un événement
+                {% endif %}
+            </h1>
+            <p class="mb-0 text-white-50">
+                {% if evenement %}
+                    Modifiez les informations de votre événement et enregistrez les changements.
+                {% else %}
+                    Renseignez les informations nécessaires pour publier un nouvel événement.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="form-card">
+
+        <div class="form-section-title">
+            <i class="bi bi-info-circle me-2 text-primary"></i>
+            Informations générales
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
 
                 {% for field in form %}
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">
+                    <div class="{% if field.name == 'description' %}col-12{% else %}col-md-6{% endif %}">
+
+                        <label for="{{ field.id_for_label }}" class="form-label">
                             {{ field.label }}
+                            {% if field.field.required %}
+                                <span class="text-danger">*</span>
+                            {% endif %}
                         </label>
 
                         {{ field }}
 
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+
                         {% for error in field.errors %}
-                            <div class="text-danger small">
-                                {{ error }}
+                            <div class="field-error">
+                                <i class="bi bi-exclamation-circle me-1"></i>{{ error }}
                             </div>
                         {% endfor %}
+
                     </div>
                 {% endfor %}
 
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
-                    </div>
-                {% endif %}
+            </div>
 
-                <div class="d-flex gap-2">
-                    <button class="btn btn-primary">
-                        Enregistrer
-                    </button>
+            <div class="form-actions">
+                <a href="{% url 'manager_dashboard' %}" class="btn-cancel">
+                    <i class="bi bi-arrow-left me-1"></i> Annuler
+                </a>
 
-                    <a href="{% url 'manager_dashboard' %}"
-                       class="btn btn-outline-secondary">
-                        Annuler
-                    </a>
-                </div>
-            </form>
-        </div>
+                <button type="submit" class="btn-eventia">
+                    {% if evenement %}
+                        <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+                    {% else %}
+                        <i class="bi bi-plus-circle me-2"></i>Créer l'événement
+                    {% endif %}
+                </button>
+            </div>
+
+        </form>
     </div>
+
+    <div class="text-center text-muted small mt-3">
+        <i class="bi bi-shield-check me-1"></i>
+        Les champs marqués d'un astérisque sont obligatoires.
+    </div>
+
 </div>
 {% endblock %}

@@ -27,6 +27,11 @@ class Evenement(models.Model):
         choices=CATEGORIES
     )
 
+    image = models.ImageField(
+    upload_to='evenements/',
+    blank=True,
+    null=True
+    )
     date_creation = models.DateTimeField(
         auto_now_add=True
     )

@@ -1,140 +1,448 @@
 
 {% extends 'events/base.html' %}
 
-{% block title %}Événements | Eventia{% endblock %}
+{% block title %}Découvrir les événements | EVENTIA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-cover {
+        width: 100%;
+        height: 215px;
+        object-fit: cover;
+        display: block;
+        transition: transform .4s ease;
+    }
+
+    .event-image-wrapper {
+        height: 215px;
+        overflow: hidden;
+        position: relative;
+        background: linear-gradient(135deg, #17294d, #4263eb);
+    }
+
+    .event-card:hover .event-cover {
+        transform: scale(1.05);
+    }
+
+    .event-image-placeholder {
+        height: 215px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 10px;
+        color: white;
+        background:
+            radial-gradient(circle at 80% 20%, rgba(255,255,255,.2), transparent 30%),
+            linear-gradient(135deg, #111c36, #4263eb);
+    }
+
+    .event-image-placeholder .placeholder-letter {
+        font-size: 48px;
+        font-weight: 850;
+        opacity: .9;
+    }
+
+    .event-image-placeholder span:last-child {
+        font-size: 11px;
+        letter-spacing: 2px;
+        font-weight: 700;
+    }
+
+    .event-card {
+        overflow: hidden;
+        border-radius: 18px;
+    }
+
+    .event-card .card-body {
+        padding: 23px;
+    }
+
+    .event-card .event-description {
+        min-height: 66px;
+    }
+
+    .event-meta {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        margin-bottom: 13px;
+        color: #65718a;
+        font-size: 13px;
+    }
+
+    .event-meta-icon {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        color: #4263eb;
+        background: #edf1ff;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .event-meta strong {
+        display: block;
+        color: #25314b;
+        font-size: 12px;
+        margin-bottom: 3px;
+    }
+
+    .event-availability {
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .event-card .btn {
+        font-size: 13px;
+    }
+
+    .hero {
+        margin-bottom: 48px !important;
+    }
+
+    @media (max-width: 768px) {
+        .event-cover,
+        .event-image-wrapper,
+        .event-image-placeholder {
+            height: 190px;
+        }
+    }
+</style>
+{% endblock %}
+
 
 {% block content %}
 
+<!-- HERO -->
 <section class="hero mb-5">
-    <span class="badge bg-light text-primary mb-3">
-        DÉCOUVREZ · PARTICIPEZ · PARTAGEZ
-    </span>
+    <div class="hero-content">
 
-    <h1 class="display-5 fw-bold">Trouvez votre prochain événement.</h1>
+        <span class="hero-label">
+            DÉCOUVREZ · PARTICIPEZ · PARTAGEZ
+        </span>
 
-    <p class="lead opacity-75">
-        Découvrez les événements et réservez votre place en quelques clics.
-    </p>
+        <h1>
+            Vivez vos prochains<br>
+            grands moments.
+        </h1>
+
+        <p class="mt-3 mb-4">
+            Explorez les événements qui vous intéressent,
+            découvrez de nouvelles expériences et réservez
+            votre place en quelques clics.
+        </p>
+
+        <a href="#evenements" class="btn btn-light px-4 py-3 fw-bold">
+            Explorer les événements →
+        </a>
+
+    </div>
 </section>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-        <h2 class="fw-bold">Événements à venir</h2>
-        <p class="text-secondary">Explorez les événements disponibles.</p>
+
+<!-- LISTE DES EVENEMENTS -->
+<section id="evenements">
+
+    <div class="d-flex flex-column flex-md-row
+                justify-content-between align-items-md-end mb-4 gap-2">
+
+        <div>
+            <div class="text-primary small fw-bold mb-2">
+                NOTRE PROGRAMME
+            </div>
+
+            <h2 class="page-heading mb-1">
+                Événements à venir
+            </h2>
+
+            <p class="page-subtitle mb-0">
+                Trouvez l'événement qui vous correspond.
+            </p>
+        </div>
+
+        <span class="text-secondary small">
+            {{ page_obj.paginator.count }} événement(s) disponible(s)
+        </span>
+
     </div>
-</div>
 
-<form method="get" class="card p-3 mb-4">
-    <div class="row g-2">
-        <div class="col-md-7">
-            <input type="text" name="q" class="form-control"
-                   placeholder="Rechercher un événement..."
-                   value="{{ recherche }}">
+
+    <!-- RECHERCHE ET FILTRES -->
+    <form method="get" class="card p-3 p-md-4 mb-4">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-7">
+                <label class="form-label">Rechercher</label>
+
+                <input
+                    type="text"
+                    name="q"
+                    class="form-control"
+                    placeholder="Rechercher par titre..."
+                    value="{{ recherche }}"
+                >
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">Catégorie</label>
+
+                <select name="categorie" class="form-select">
+
+                    <option value="">Toutes les catégories</option>
+
+                    {% for code, nom in categories %}
+                        <option
+                            value="{{ code }}"
+                            {% if categorie == code %}selected{% endif %}
+                        >
+                            {{ nom }}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary py-2">
+                    Rechercher
+                </button>
+            </div>
+
         </div>
+    </form>
 
-        <div class="col-md-3">
-            <select name="categorie" class="form-select">
-                <option value="">Toutes les catégories</option>
-                {% for code, nom in categories %}
-                    <option value="{{ code }}"
-                        {% if categorie == code %}selected{% endif %}>
-                        {{ nom }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
 
-        <div class="col-md-2 d-grid">
-            <button class="btn btn-primary">Rechercher</button>
-        </div>
-    </div>
-</form>
+    <!-- CARTES EVENEMENTS -->
+    <div class="row g-4">
 
-<div class="row g-4">
+        {% for evenement in page_obj %}
 
-    {% for evenement in page_obj %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100">
-                <div class="card-body p-4">
+            <div class="col-md-6 col-lg-4">
 
-                    <span class="badge text-bg-primary mb-3">
-                        {{ evenement.get_categorie_display }}
-                    </span>
+                <article class="card event-card h-100">
 
-                    <h4 class="fw-bold">{{ evenement.titre }}</h4>
+                    <!-- IMAGE -->
+                    <div class="event-image-wrapper">
 
-                    <p class="text-secondary">
-                        {{ evenement.description|truncatewords:20 }}
+                        {% if evenement.image %}
+
+                            <img
+                                src="{{ evenement.image.url }}"
+                                alt="{{ evenement.titre }}"
+                                class="event-cover"
+                            >
+
+                        {% else %}
+
+                            <div class="event-image-placeholder">
+                                <span class="placeholder-letter">E.</span>
+                                <span>EVENTIA EXPERIENCE</span>
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="card-body d-flex flex-column">
+
+                        <!-- CATEGORIE ET DISPONIBILITE -->
+                        <div class="d-flex justify-content-between
+                                    align-items-center mb-3 gap-2">
+
+                            <span class="category-badge">
+                                {{ evenement.get_categorie_display }}
+                            </span>
+
+                            {% if evenement.est_complet %}
+                                <span class="status-badge status-cancelled">
+                                    Complet
+                                </span>
+                            {% else %}
+                                <span class="event-availability text-success">
+                                    Disponible
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- TITRE -->
+                        <h3 class="event-title mb-2">
+                            {{ evenement.titre }}
+                        </h3>
+
+
+                        <!-- DESCRIPTION -->
+                        <p class="event-description">
+                            {{ evenement.description|truncatewords:20 }}
+                        </p>
+
+
+                        <hr class="my-3">
+
+
+                        <!-- DATE -->
+                        <div class="event-meta">
+
+                            <span class="event-meta-icon">D</span>
+
+                            <div>
+                                <strong>Date et heure</strong>
+                                {{ evenement.date|date:"d/m/Y à H:i" }}
+                            </div>
+
+                        </div>
+
+
+                        <!-- LIEU -->
+                        <div class="event-meta">
+
+                            <span class="event-meta-icon">L</span>
+
+                            <div>
+                                <strong>Lieu</strong>
+                                {{ evenement.lieu }}
+                            </div>
+
+                        </div>
+
+
+                        <!-- PLACES RESTANTES -->
+                        <div class="event-meta mb-4">
+
+                            <span class="event-meta-icon">P</span>
+
+                            <div>
+                                <strong>Places restantes</strong>
+
+                                {% if evenement.places_restantes > 0 %}
+
+                                    <span class="text-success fw-bold">
+                                        {{ evenement.places_restantes }}
+                                        place(s) disponible(s)
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="text-danger fw-bold">
+                                        Aucune place disponible
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BOUTON -->
+                        <div class="mt-auto">
+
+                            <a
+                                href="{% url 'event_detail' evenement.pk %}"
+                                class="btn btn-primary w-100 py-2"
+                            >
+                                Découvrir l'événement →
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+
+                <div class="card text-center p-5">
+
+                    <div class="display-5 mb-3">🔎</div>
+
+                    <h4 class="fw-bold">
+                        Aucun événement trouvé
+                    </h4>
+
+                    <p class="text-secondary mb-3">
+                        Essayez de modifier votre recherche
+                        ou de choisir une autre catégorie.
                     </p>
 
-                    <hr>
+                    <div>
+                        <a
+                            href="{% url 'event_list' %}"
+                            class="btn btn-outline-primary"
+                        >
+                            Réinitialiser les filtres
+                        </a>
+                    </div>
 
-                    <p class="mb-2">
-                        <strong>📅 Date :</strong>
-                        {{ evenement.date|date:"d/m/Y à H:i" }}
-                    </p>
-
-                    <p class="mb-2">
-                        <strong>📍 Lieu :</strong>
-                        {{ evenement.lieu }}
-                    </p>
-
-                    <p class="mb-3">
-                        <strong>Places restantes :</strong>
-                        {{ evenement.places_restantes }}
-                    </p>
-
-                    <a href="{% url 'event_detail' evenement.pk %}"
-                       class="btn btn-primary w-100">
-                        Voir les détails
-                    </a>
                 </div>
+
             </div>
-        </div>
 
-    {% empty %}
-        <div class="col-12">
-            <div class="card p-5 text-center">
-                <h4>Aucun événement trouvé</h4>
-                <p class="text-secondary">
-                    Essayez de modifier votre recherche.
-                </p>
-            </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
-</div>
+    </div>
 
-{% if page_obj.has_other_pages %}
-<nav class="mt-5">
-    <ul class="pagination justify-content-center">
 
-        {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link"
-                   href="?q={{ recherche|urlencode }}&categorie={{ categorie|urlencode }}&page={{ page_obj.previous_page_number }}">
-                    Précédent
-                </a>
-            </li>
-        {% endif %}
+    <!-- PAGINATION -->
+    {% if page_obj.has_other_pages %}
 
-        <li class="page-item active">
-            <span class="page-link">
-                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-            </span>
-        </li>
+        <nav class="mt-5" aria-label="Pagination">
 
-        {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link"
-                   href="?q={{ recherche|urlencode }}&categorie={{ categorie|urlencode }}&page={{ page_obj.next_page_number }}">
-                    Suivant
-                </a>
-            </li>
-        {% endif %}
+            <ul class="pagination justify-content-center">
 
-    </ul>
-</nav>
-{% endif %}
+                {% if page_obj.has_previous %}
+
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?q={{ recherche|urlencode }}&categorie={{ categorie|urlencode }}&page={{ page_obj.previous_page_number }}"
+                        >
+                            ← Précédent
+                        </a>
+                    </li>
+
+                {% endif %}
+
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        {{ page_obj.number }}
+                        / {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+
+                {% if page_obj.has_next %}
+
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?q={{ recherche|urlencode }}&categorie={{ categorie|urlencode }}&page={{ page_obj.next_page_number }}"
+                        >
+                            Suivant →
+                        </a>
+                    </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</section>
 
 {% endblock %}

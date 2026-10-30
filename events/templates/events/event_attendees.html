@@ -1,61 +1,212 @@
 
 {% extends 'events/base.html' %}
 
-{% block title %}Participants | Eventia{% endblock %}
+{% block title %}Participants | EVENTIA{% endblock %}
 
 {% block content %}
 
-<a href="{% url 'manager_dashboard' %}"
-   class="text-decoration-none">
-    ← Retour au tableau de bord
-</a>
+<div class="mb-4">
+    <a href="{% url 'manager_dashboard' %}"
+       class="text-decoration-none text-secondary small fw-semibold">
+        ← Retour au tableau de bord
+    </a>
+</div>
 
-<div class="card p-4 mt-3">
-    <h2 class="fw-bold">{{ evenement.titre }}</h2>
+<div class="mb-4">
+    <div class="text-primary small fw-bold mb-2">
+        ESPACE ORGANISATEUR
+    </div>
 
-    <p class="text-secondary">
-        Participants : {{ inscriptions.count }}
+    <h1 class="page-heading mb-2">
+        Gestion des participants
+    </h1>
+
+    <p class="page-subtitle">
+        Consultez les inscriptions et suivez les statuts des participants.
     </p>
+</div>
+
+<div class="card p-4 mb-4">
+
+    <div class="d-flex flex-column flex-md-row
+                justify-content-between align-items-md-center gap-3">
+
+        <div>
+            <span class="category-badge mb-3">
+                {{ evenement.get_categorie_display }}
+            </span>
+
+            <h2 class="h4 fw-bold mt-2 mb-2">
+                {{ evenement.titre }}
+            </h2>
+
+            <div class="text-secondary small">
+                📅 {{ evenement.date|date:"d/m/Y à H:i" }}
+                <span class="mx-2">·</span>
+                📍 {{ evenement.lieu }}
+            </div>
+        </div>
+
+        <div class="text-md-end">
+            <div class="text-secondary small fw-semibold">
+                CAPACITÉ TOTALE
+            </div>
+
+            <div class="display-6 fw-bold" style="color:#4263eb;">
+                {{ evenement.capacite }}
+            </div>
+
+            <div class="small text-secondary">
+                {{ evenement.places_restantes }} place(s) restante(s)
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <div class="text-secondary small fw-semibold">
+                TOTAL DES INSCRIPTIONS
+            </div>
+
+            <div class="display-6 fw-bold mt-2">
+                {{ inscriptions.count }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <div class="text-secondary small fw-semibold">
+                INSCRIPTIONS CONFIRMÉES
+            </div>
+
+            <div class="display-6 fw-bold text-success mt-2">
+                {{ total_confirmees }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4 h-100">
+            <div class="text-secondary small fw-semibold">
+                INSCRIPTIONS ANNULÉES
+            </div>
+
+            <div class="display-6 fw-bold text-secondary mt-2">
+                {{ total_annulees }}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card p-3 p-md-4">
+
+    <div class="d-flex flex-column flex-md-row
+                justify-content-between align-items-md-center mb-3 gap-2">
+
+        <div>
+            <h3 class="h5 fw-bold mb-1">
+                Liste des participants
+            </h3>
+
+            <p class="text-secondary small mb-0">
+                Historique des inscriptions à cet événement.
+            </p>
+        </div>
+
+        <span class="category-badge">
+            {{ inscriptions.count }} inscription(s)
+        </span>
+
+    </div>
 
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
+
+        <table class="table table-hover align-middle mb-0">
+
             <thead>
                 <tr>
-                    <th>Utilisateur</th>
-                    <th>E-mail</th>
+                    <th>Participant</th>
+                    <th>Adresse e-mail</th>
                     <th>Date d'inscription</th>
                     <th>Statut</th>
                 </tr>
             </thead>
 
             <tbody>
+
                 {% for inscription in inscriptions %}
+
                     <tr>
-                        <td>{{ inscription.utilisateur.username }}</td>
-                        <td>{{ inscription.utilisateur.email|default:"Non renseigné" }}</td>
-                        <td>{{ inscription.date_inscription|date:"d/m/Y H:i" }}</td>
+
+                        <td>
+                            <div class="fw-bold">
+                                {{ inscription.utilisateur.username }}
+                            </div>
+
+                            <div class="text-secondary small">
+                                Participant
+                            </div>
+                        </td>
+
+                        <td>
+                            {{ inscription.utilisateur.email|default:"Non renseigné" }}
+                        </td>
+
+                        <td>
+                            {{ inscription.date_inscription|date:"d/m/Y à H:i" }}
+                        </td>
+
                         <td>
                             {% if inscription.statut == 'confirmee' %}
-                                <span class="badge text-bg-success">
-                                    Confirmée
+
+                                <span class="status-badge status-confirmed">
+                                    ✓ Confirmée
                                 </span>
+
                             {% else %}
-                                <span class="badge text-bg-secondary">
+
+                                <span class="status-badge status-cancelled">
                                     Annulée
                                 </span>
+
                             {% endif %}
                         </td>
+
                     </tr>
+
                 {% empty %}
+
                     <tr>
-                        <td colspan="4" class="text-center">
-                            Aucun participant inscrit.
+                        <td colspan="4" class="text-center py-5">
+
+                            <div class="display-6 mb-3">👥</div>
+
+                            <h5 class="fw-bold">
+                                Aucun participant inscrit
+                            </h5>
+
+                            <p class="text-secondary mb-0">
+                                Les inscriptions apparaîtront ici.
+                            </p>
+
                         </td>
                     </tr>
+
                 {% endfor %}
+
             </tbody>
+
         </table>
+
     </div>
+
 </div>
 
 {% endblock %}

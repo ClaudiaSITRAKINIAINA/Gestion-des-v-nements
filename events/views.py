@@ -1,10 +1,11 @@
 
 from functools import wraps
-
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Evenement
+from .forms import EvenementForm
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
@@ -23,6 +24,7 @@ def gestionnaire_required(view_func):
     @wraps(view_func)
     @login_required
     def wrapper(request, *args, **kwargs):
+
         autorise = (
             request.user.is_staff
             or request.user.groups.filter(
@@ -47,6 +49,7 @@ def gestionnaire_required(view_func):
 # =====================================================
 
 def event_list(request):
+
     evenements = Evenement.objects.filter(
         date__gt=timezone.now()
     ).order_by('date')
@@ -69,17 +72,22 @@ def event_list(request):
         )
 
     paginator = Paginator(evenements, 6)
-    page_obj = paginator.get_page(request.GET.get('page'))
+
+    page_obj = paginator.get_page(
+        request.GET.get('page')
+    )
+
+    context = {
+        'page_obj': page_obj,
+        'recherche': recherche,
+        'categorie': categorie,
+        'categories': Evenement.CATEGORIES,
+    }
 
     return render(
         request,
         'events/event_list.html',
-        {
-            'page_obj': page_obj,
-            'recherche': recherche,
-            'categorie': categorie,
-            'categories': Evenement.CATEGORIES,
-        }
+        context
     )
 
 
@@ -88,7 +96,11 @@ def event_list(request):
 # =====================================================
 
 def event_detail(request, pk):
-    evenement = get_object_or_404(Evenement, pk=pk)
+
+    evenement = get_object_or_404(
+        Evenement,
+        pk=pk
+    )
 
     inscription = None
 
@@ -98,30 +110,38 @@ def event_detail(request, pk):
             evenement=evenement
         ).first()
 
+    context = {
+        'evenement': evenement,
+        'inscription': inscription,
+        'now': timezone.now(),
+    }
+
     return render(
         request,
         'events/event_detail.html',
-      {
-    'evenement': evenement,
-    'inscription': inscription,
-    'now': timezone.now(),
-      }
+        context
     )
 
 
 # =====================================================
-# INSCRIPTION / CONNEXION / DECONNEXION
+# INSCRIPTION / CREATION DE COMPTE
 # =====================================================
 
 def register(request):
+
     if request.user.is_authenticated:
         return redirect('event_list')
 
     if request.method == 'POST':
-        form = InscriptionUtilisateurForm(request.POST)
+
+        form = InscriptionUtilisateurForm(
+            request.POST
+        )
 
         if form.is_valid():
+
             user = form.save()
+
             login(request, user)
 
             messages.success(
@@ -130,6 +150,7 @@ def register(request):
             )
 
             return redirect('event_list')
+
     else:
         form = InscriptionUtilisateurForm()
 
@@ -149,46 +170,71 @@ def register(request):
 def event_register(request, pk):
 
     with transaction.atomic():
+
         evenement = get_object_or_404(
             Evenement.objects.select_for_update(),
             pk=pk
         )
 
+        # Vérifier que l'événement n'a pas commencé
         if evenement.date <= timezone.now():
+
             messages.error(
                 request,
                 "Cet événement est déjà passé ou a commencé."
             )
-            return redirect('event_detail', pk=pk)
 
+            return redirect(
+                'event_detail',
+                pk=pk
+            )
+
+        # Vérifier si l'utilisateur est déjà inscrit
         inscription = Inscription.objects.filter(
             utilisateur=request.user,
             evenement=evenement
         ).first()
 
         if inscription and inscription.statut == 'confirmee':
+
             messages.warning(
                 request,
                 "Vous êtes déjà inscrit à cet événement."
             )
-            return redirect('event_detail', pk=pk)
 
-        places = evenement.places_restantes()
+            return redirect(
+                'event_detail',
+                pk=pk
+            )
 
-        if places <= 0:
+        # Vérifier les places restantes
+        if evenement.places_restantes() <= 0:
+
             messages.error(
                 request,
                 "Désolé, cet événement est complet."
             )
-            return redirect('event_detail', pk=pk)
 
+            return redirect(
+                'event_detail',
+                pk=pk
+            )
+
+        # Réactiver une ancienne inscription annulée
         if inscription:
+
             inscription.statut = 'confirmee'
             inscription.date_inscription = timezone.now()
+
             inscription.save(
-                update_fields=['statut', 'date_inscription']
+                update_fields=[
+                    'statut',
+                    'date_inscription'
+                ]
             )
+
         else:
+
             Inscription.objects.create(
                 utilisateur=request.user,
                 evenement=evenement,
@@ -218,18 +264,26 @@ def cancel_registration(request, pk):
     )
 
     if inscription.evenement.date <= timezone.now():
+
         messages.error(
             request,
             "Vous ne pouvez plus annuler cette inscription."
         )
+
     elif inscription.statut == 'annulee':
+
         messages.warning(
             request,
             "Cette inscription est déjà annulée."
         )
+
     else:
+
         inscription.statut = 'annulee'
-        inscription.save(update_fields=['statut'])
+
+        inscription.save(
+            update_fields=['statut']
+        )
 
         messages.success(
             request,
@@ -240,7 +294,7 @@ def cancel_registration(request, pk):
 
 
 # =====================================================
-# ESPACE PERSONNEL UTILISATEUR
+# ESPACE PERSONNEL PARTICIPANT
 # =====================================================
 
 @login_required
@@ -248,17 +302,32 @@ def my_registrations(request):
 
     inscriptions = Inscription.objects.filter(
         utilisateur=request.user
-    ).select_related('evenement').order_by(
+    ).select_related(
+        'evenement'
+    ).order_by(
         '-date_inscription'
     )
+
+    context = {
+        'inscriptions': inscriptions,
+        'now': timezone.now(),
+
+        # Statistiques personnelles exactes
+        'total_inscriptions': inscriptions.count(),
+
+        'total_confirmees': inscriptions.filter(
+            statut='confirmee'
+        ).count(),
+
+        'total_annulees': inscriptions.filter(
+            statut='annulee'
+        ).count(),
+    }
 
     return render(
         request,
         'events/my_registrations.html',
-        {
-    'inscriptions': inscriptions,
-    'now': timezone.now(),
-        }
+        context
     )
 
 
@@ -269,15 +338,21 @@ def my_registrations(request):
 @gestionnaire_required
 def manager_dashboard(request):
 
-    evenements = Evenement.objects.all().order_by('-date')
+    evenements = Evenement.objects.all().order_by(
+        '-date'
+    )
 
     context = {
         'evenements': evenements,
+
         'total_evenements': evenements.count(),
+
         'total_inscriptions': Inscription.objects.count(),
+
         'total_confirmees': Inscription.objects.filter(
             statut='confirmee'
         ).count(),
+
         'total_annulees': Inscription.objects.filter(
             statut='annulee'
         ).count(),
@@ -291,83 +366,72 @@ def manager_dashboard(request):
 
 
 # =====================================================
-# CREATION EVENEMENT
+# CREATION D'UN EVENEMENT
 # =====================================================
 
 @gestionnaire_required
 def event_create(request):
-
     if request.method == 'POST':
-        form = EvenementForm(request.POST)
+        form = EvenementForm(request.POST, request.FILES)
 
         if form.is_valid():
-            form.save()
-
+            evenement = form.save()
             messages.success(
                 request,
-                "Événement créé avec succès."
+                "L'événement a été créé avec succès."
             )
-
-            return redirect('manager_dashboard')
+            return redirect('event_detail', pk=evenement.pk)
     else:
         form = EvenementForm()
 
-    return render(
-        request,
-        'events/event_form.html',
-        {
-            'form': form,
-            'titre_page': 'Créer un événement',
-        }
-    )
-
+    return render(request, 'events/event_form.html', {
+        'form': form,
+        'titre_page': 'Créer un événement'
+    })
 
 # =====================================================
-# MODIFICATION EVENEMENT
+# MODIFICATION D'UN EVENEMENT
 # =====================================================
 
 @gestionnaire_required
 def event_update(request, pk):
-
     evenement = get_object_or_404(Evenement, pk=pk)
 
     if request.method == 'POST':
         form = EvenementForm(
             request.POST,
+            request.FILES,
             instance=evenement
         )
 
         if form.is_valid():
             form.save()
-
             messages.success(
                 request,
-                "Événement modifié avec succès."
+                "L'événement a été modifié avec succès."
             )
-
             return redirect('manager_dashboard')
     else:
         form = EvenementForm(instance=evenement)
 
-    return render(
-        request,
-        'events/event_form.html',
-        {
-            'form': form,
-            'titre_page': 'Modifier un événement',
-        }
-    )
-
-
+    return render(request, 'events/event_form.html', {
+        'form': form,
+        'evenement': evenement,
+        'titre_page': 'Modifier un événement'
+    })
 # =====================================================
-# SUPPRESSION EVENEMENT
+# SUPPRESSION D'UN EVENEMENT
 # =====================================================
 
 @gestionnaire_required
 @require_POST
 def event_delete(request, pk):
 
-    evenement = get_object_or_404(Evenement, pk=pk)
+    evenement = get_object_or_404(
+        Evenement,
+        pk=pk
+    )
+
     evenement.delete()
 
     messages.success(
@@ -375,7 +439,9 @@ def event_delete(request, pk):
         "Événement supprimé avec succès."
     )
 
-    return redirect('manager_dashboard')
+    return redirect(
+        'manager_dashboard'
+    )
 
 
 # =====================================================
@@ -385,19 +451,34 @@ def event_delete(request, pk):
 @gestionnaire_required
 def event_attendees(request, pk):
 
-    evenement = get_object_or_404(Evenement, pk=pk)
+    evenement = get_object_or_404(
+        Evenement,
+        pk=pk
+    )
 
     inscriptions = Inscription.objects.filter(
         evenement=evenement
-    ).select_related('utilisateur').order_by(
+    ).select_related(
+        'utilisateur'
+    ).order_by(
         '-date_inscription'
     )
+
+    context = {
+        'evenement': evenement,
+        'inscriptions': inscriptions,
+
+        'total_confirmees': inscriptions.filter(
+            statut='confirmee'
+        ).count(),
+
+        'total_annulees': inscriptions.filter(
+            statut='annulee'
+        ).count(),
+    }
 
     return render(
         request,
         'events/event_attendees.html',
-        {
-            'evenement': evenement,
-            'inscriptions': inscriptions,
-        }
+        context
     )

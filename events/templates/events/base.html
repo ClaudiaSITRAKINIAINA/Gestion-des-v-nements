@@ -5,149 +5,513 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Eventia | Gestion des événements{% endblock %}</title>
+
+    <title>{% block title %}EVENTIA | Gestion des événements{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
     <style>
         :root {
-            --navy: #101c36;
-            --blue: #315efb;
-            --background: #f4f6fb;
+            --navy: #111c36;
+            --navy-light: #1d2c4d;
+            --primary: #4263eb;
+            --primary-dark: #3451cc;
+            --background: #f5f7fc;
+            --surface: #ffffff;
+            --text: #25314b;
+            --muted: #7c879e;
+            --border: #e8ecf4;
+            --success: #159b69;
+            --danger: #dc5363;
+            --radius: 18px;
+            --shadow: 0 8px 30px rgba(25, 43, 80, .06);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             background: var(--background);
-            color: #25304a;
-            font-family: Arial, sans-serif;
+            color: var(--text);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
         }
 
-        .navbar {
+        a {
+            text-decoration: none;
+        }
+
+        /* NAVIGATION */
+
+        .main-navbar {
             background: var(--navy);
+            padding: 15px 0;
+            box-shadow: 0 4px 18px rgba(10, 20, 45, .12);
         }
 
         .navbar-brand {
-            font-weight: 800;
-            letter-spacing: .5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white !important;
+            font-size: 23px;
+            font-weight: 850;
+            letter-spacing: -.8px;
         }
 
-        .hero {
-            background: linear-gradient(120deg, #101c36, #315efb);
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
             color: white;
-            border-radius: 22px;
-            padding: 48px 35px;
+            background: linear-gradient(135deg, #6684ff, #4263eb);
+            font-size: 19px;
         }
 
-        .card {
-            border: 0;
-            border-radius: 17px;
-            box-shadow: 0 5px 24px rgba(25, 40, 75, .06);
+        .brand-dot {
+            color: #7892ff;
+        }
+
+        .navbar-nav {
+            gap: 7px;
+        }
+
+        .main-navbar .nav-link {
+            color: #c4cce0;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 14px !important;
+            border-radius: 10px;
+            transition: .2s ease;
+        }
+
+        .main-navbar .nav-link:hover {
+            color: white;
+            background: rgba(255,255,255,.09);
+        }
+
+        .nav-action {
+            border-radius: 10px;
+            padding: 10px 17px;
+            font-weight: 700;
+            font-size: 13px;
         }
 
         .btn-primary {
-            background: var(--blue);
-            border-color: var(--blue);
+            background: var(--primary);
+            border-color: var(--primary);
+            border-radius: 11px;
+            font-weight: 650;
+            transition: .2s ease;
         }
 
-        .form-control, .form-select {
-            padding: 11px;
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline-primary,
+        .btn-outline-secondary,
+        .btn-outline-danger {
             border-radius: 10px;
+            font-weight: 600;
         }
 
-        .footer {
-            color: #8390a9;
-            border-top: 1px solid #e3e8f1;
-            margin-top: 60px;
-            padding: 25px 0;
+        /* MAIN CONTENT */
+
+        main {
+            flex: 1;
+            width: 100%;
+        }
+
+        .page-container {
+            padding-top: 38px;
+            padding-bottom: 35px;
+        }
+
+        .page-heading {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -.8px;
+            color: var(--navy);
+        }
+
+        .page-subtitle {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* HERO */
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 55px 48px;
+            border-radius: 25px;
+            color: white;
+            background:
+                radial-gradient(circle at 90% 10%, rgba(116,143,255,.45), transparent 28%),
+                linear-gradient(120deg, #111c36 0%, #233f83 58%, #4263eb 100%);
+            box-shadow: 0 15px 35px rgba(36, 66, 145, .16);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: -80px;
+            bottom: -150px;
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 50%;
+            box-shadow: 0 0 0 35px rgba(255,255,255,.04),
+                        0 0 0 70px rgba(255,255,255,.03);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+        }
+
+        .hero h1 {
+            font-size: clamp(30px, 4vw, 46px);
+            font-weight: 850;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+        }
+
+        .hero p {
+            color: #d8e0ff;
+            max-width: 560px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .hero-label {
+            display: inline-block;
+            padding: 8px 13px;
+            margin-bottom: 20px;
+            color: #e4eaff;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.17);
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 750;
+            letter-spacing: 1px;
+        }
+
+        /* CARDS */
+
+        .card {
+            border: 1px solid rgba(226,232,243,.8);
+            border-radius: var(--radius);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .event-card {
+            height: 100%;
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 35px rgba(25,43,80,.11);
+        }
+
+        .event-card .card-body {
+            padding: 25px;
+        }
+
+        .event-title {
+            color: var(--navy);
+            font-size: 19px;
+            font-weight: 800;
+            line-height: 1.4;
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 12px;
+            color: #4263eb;
+            background: #edf1ff;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .event-description {
+            min-height: 66px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .event-info {
+            color: #5f6c84;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .event-info strong {
+            color: var(--text);
+        }
+
+        /* FORMS */
+
+        .form-control,
+        .form-select {
+            min-height: 46px;
+            padding: 11px 14px;
+            border: 1px solid #e1e6f0;
+            border-radius: 11px;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        textarea.form-control {
+            min-height: 130px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #8da3ff;
+            box-shadow: 0 0 0 4px rgba(66,99,235,.10);
+        }
+
+        .form-label {
+            margin-bottom: 8px;
+            color: var(--navy);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        /* TABLE */
+
+        .table {
+            --bs-table-bg: transparent;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .table thead th {
+            padding: 15px 13px;
+            background: #f7f8fc;
+            color: #78849b;
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            padding: 16px 13px;
+            border-bottom: 1px solid #edf0f6;
+            vertical-align: middle;
+        }
+
+        /* STATUS */
+
+        .status-badge {
+            display: inline-block;
+            padding: 7px 11px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        .status-confirmed {
+            color: #08794e;
+            background: #e3f7ed;
+        }
+
+        .status-cancelled {
+            color: #687386;
+            background: #edf0f5;
+        }
+
+        /* ALERTS */
+
+        .alert {
+            border: 0;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+
+        /* FOOTER */
+
+        .site-footer {
+            margin-top: 50px;
+            padding: 27px 0;
+            background: white;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .site-footer strong {
+            color: var(--navy);
+            letter-spacing: .5px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 38px 25px;
+                border-radius: 18px;
+            }
+
+            .page-container {
+                padding-top: 25px;
+            }
+
+            .page-heading {
+                font-size: 23px;
+            }
+
+            .navbar-nav {
+                padding-top: 15px;
+                align-items: stretch !important;
+            }
         }
     </style>
+
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark">
+<nav class="navbar navbar-expand-lg navbar-dark main-navbar">
     <div class="container">
+
         <a class="navbar-brand" href="{% url 'event_list' %}">
-            EVENTIA.
+            <span class="brand-icon">E</span>
+            EVENTIA<span class="brand-dot">.</span>
         </a>
 
         <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navigation">
+                data-bs-toggle="collapse"
+                data-bs-target="#navigation"
+                aria-controls="navigation"
+                aria-expanded="false"
+                aria-label="Ouvrir le menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navigation">
-            <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <div class="navbar-nav ms-auto align-items-lg-center">
 
                 <a class="nav-link" href="{% url 'event_list' %}">
-                    Événements
+                    Découvrir
                 </a>
 
                 {% if user.is_authenticated %}
+
                     <a class="nav-link" href="{% url 'my_registrations' %}">
                         Mes inscriptions
                     </a>
 
-                    {% if user.is_staff or user.groups.all %}
-                        {% if user.is_staff %}
-                            <a class="nav-link" href="{% url 'manager_dashboard' %}">
-                                Gestion
-                            </a>
-                        {% else %}
-                            {% for group in user.groups.all %}
-                                {% if group.name == 'Gestionnaire' %}
-                                    <a class="nav-link" href="{% url 'manager_dashboard' %}">
-                                        Gestion
-                                    </a>
-                                {% endif %}
-                            {% endfor %}
-                        {% endif %}
+                    {% if user.is_staff %}
+                        <a class="nav-link" href="{% url 'manager_dashboard' %}">
+                            Gestion
+                        </a>
+                    {% else %}
+                        {% for group in user.groups.all %}
+                            {% if group.name == 'Gestionnaire' %}
+                                <a class="nav-link" href="{% url 'manager_dashboard' %}">
+                                    Gestion
+                                </a>
+                            {% endif %}
+                        {% endfor %}
                     {% endif %}
+
+                    <span class="text-white-50 small ms-lg-3 me-lg-2">
+                        {{ user.username }}
+                    </span>
 
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button class="btn btn-outline-light btn-sm">
+                        <button type="submit"
+                                class="btn btn-outline-light nav-action">
                             Déconnexion
                         </button>
                     </form>
+
                 {% else %}
+
                     <a class="nav-link" href="{% url 'login' %}">
                         Connexion
                     </a>
-                    <a class="btn btn-primary btn-sm px-3"
+
+                    <a class="btn btn-primary nav-action ms-lg-2"
                        href="{% url 'register' %}">
                         Créer un compte
                     </a>
+
                 {% endif %}
             </div>
         </div>
     </div>
 </nav>
 
-<main class="container py-4">
+<main>
+    <div class="container page-container">
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                {{ message }}
-                <button type="button" class="btn-close"
-                        data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert
+                    {% if message.tags == 'error' %}alert-danger
+                    {% elif message.tags == 'success' %}alert-success
+                    {% elif message.tags == 'warning' %}alert-warning
+                    {% else %}alert-info{% endif %}
+                    alert-dismissible fade show"
+                    role="alert">
 
-    {% block content %}{% endblock %}
+                    {{ message }}
 
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Fermer"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+    </div>
 </main>
 
-<footer class="footer">
-    <div class="container text-center">
-        <strong>EVENTIA.</strong> — Plateforme de gestion des événements.
-        <div class="small mt-2">© 2026 — Tous droits réservés.</div>
+<footer class="site-footer">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between
+                    align-items-center gap-2">
+            <div>
+                <strong>EVENTIA.</strong>
+                <span class="ms-2">La gestion événementielle simplifiée.</span>
+            </div>
+
+            <div>
+                © 2026 EVENTIA — Tous droits réservés.
+            </div>
+        </div>
     </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+
 </body>
 </html>
